@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>👑 King Casino</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: #0e0e10;
+      color: #fff;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 220px;
+      background: #16161a;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      border-right: 2px solid #ffd700;
+    }
+
+    .sidebar h2 {
+      font-size: 1.3rem;
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+
+    .sidebar button {
+      background: none;
+      border: 2px solid #ffd700;
+      color: #ffd700;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .sidebar button:hover {
+      background: #ffd700;
+      color: #0e0e10;
+    }
+
+    .main {
+      flex-grow: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2.3rem;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    .hidden { display: none; }
+
+    .casino-container {
+      background: #16161a;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255,215,0,0.1);
+      padding: 20px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .reels {
+      display: grid;
+      grid-template-columns: repeat(5, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .symbol {
+      width: 100px;
+      height: 100px;
+      background: #1e1e22;
+      border: 2px solid #ffd700;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .symbol img {
+      width: 80%;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .controls select, .controls button {
+      padding: 10px;
+      font-size: 1rem;
+      background: #ffd700;
+      border: none;
+      border-radius: 5px;
+      color: #0e0e10;
+      cursor: pointer;
+    }
+
+    .info {
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .card-area {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .card {
+      width: 60px;
+      height: 90px;
+      background: transparent;
+      border-radius: 8px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: deal 0.4s ease forwards;
+      transform: translateY(30px);
+      opacity: 0;
+    }
+
+    .card img {
+      width: 100%;
+      height: auto;
+    }
+
+    @keyframes deal {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .stats {
+      font-size: 0.9rem;
+      color: #ccc;
+      line-height: 1.4;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <h2>👑 King Casino</h2>
+    <button onclick="switchGame('slots')">🎰 Slots</button>
+    <button onclick="switchGame('blackjack')">🃏 Blackjack</button>
+    <hr style="border: 1px solid #333">
+    <div id="balanceDisplay">💰 Balance: $1000</div>
+    <div class="stats">
+      📈 Spins: <span id="spinStat">0</span><br>
+      🃏 Hands: <span id="handStat">0</span><br>
+      🏆 Wins: <span id="winStat">0</span>
+    </div>
+    <div style="margin-top: 20px;">
+      🧑 Player: <span id="playerName">Guest</span><br>
+      <button onclick="changeName()">Change Name</button>
+    </div>
+  </div>
+
+  <div class="main">
+    <h1>Welcome to King Casino</h1>
+
+    <!-- 🎰 SLOTS -->
+    <div id="slots" class="casino-container">
+      <div class="reels" id="reels"></div>
+      <div class="controls">
+        <select id="bet-amount">
+          <option value="10">$10</option>
+          <option value="20">$20</option>
+          <option value="50">$50</option>
+        </select>
+        <button onclick="spin()">Spin 🎯</button>
+      </div>
+      <div class="info" id="slotResult"></div>
+    </div>
+
+    <!-- 🃏 BLACKJACK -->
+    <div id="blackjack" class="casino-container hidden">
+      <h2 style="text-align:center;">Blackjack</h2>
+      <div style="margin-bottom:10px;">Bet:
+        <select id="blackjack-bet">
+          <option value="10">$10</option>
+          <option value="20">$20</option>
+          <option value="50">$50</option>
+        </select>
+        <button onclick="startBlackjack()">Deal 🂠</button>
+      </div>
+
+      <div class="info" id="bjResult"></div>
+
+      <div>
+        <strong>Player Hand:</strong>
+        <div class="card-area" id="playerHand"></div>
+      </div>
+
+      <div>
+        <strong>Dealer Hand:</strong>
+        <div class="card-area" id="dealerHand"></div>
+      </div>
+
+      <div class="controls">
+        <button onclick="hit()">Hit</button>
+        <button onclick="stand()">Stand</button>
+      </div>
+    </div>
+<!-- 🎵 Sound Effects -->
+<audio id="spin-sound" src="https://assets.mixkit.co/sfx/download/mixkit-arcade-mechanical-bling-210.wav"></audio>
+<audio id="win-sound" src="https://assets.mixkit.co/sfx/download/mixkit-winning-chimes-2015.wav"></audio>
+<audio id="card-sound" src="https://assets.mixkit.co/sfx/download/mixkit-fast-double-click-on-mouse-275.wav"></audio>
+
+<script>
+let balance = parseInt(localStorage.getItem("kc_balance")) || 1000;
+let stats = JSON.parse(localStorage.getItem("kc_stats")) || { spins: 0, hands: 0, wins: 0 };
+
+const spinSound = document.getElementById("spin-sound");
+const winSound = document.getElementById("win-sound");
+const cardSound = document.getElementById("card-sound");
+
+const balanceDisplay = document.getElementById("balanceDisplay");
+const spinStat = document.getElementById("spinStat");
+const handStat = document.getElementById("handStat");
+const winStat = document.getElementById("winStat");
+const playerNameDisplay = document.getElementById("playerName");
+
+function updateStats() {
+  spinStat.textContent = stats.spins;
+  handStat.textContent = stats.hands;
+  winStat.textContent = stats.wins;
+  localStorage.setItem("kc_stats", JSON.stringify(stats));
+}
+
+function updateBalanceDisplay() {
+  balanceDisplay.textContent = `💰 Balance: $${balance}`;
+  localStorage.setItem("kc_balance", balance);
+}
+
+function loadPlayerName() {
+  const name = localStorage.getItem("kc_playerName") || "Guest";
+  playerNameDisplay.textContent = name;
+}
+
+function changeName() {
+  const newName = prompt("Enter your name:");
+  if (newName && newName.trim()) {
+    localStorage.setItem("kc_playerName", newName.trim());
+    loadPlayerName();
+  }
+}
+
+function switchGame(gameId) {
+  document.getElementById('slots').classList.add('hidden');
+  document.getElementById('blackjack').classList.add('hidden');
+  document.getElementById(gameId).classList.remove('hidden');
+}
+
+// 🎰 SLOTS GAME
+const reels = document.getElementById("reels");
+const betSelect = document.getElementById("bet-amount");
+const resultText = document.getElementById("slotResult");
+const symbols = [
+  { name: 'cherry', img: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/72x72/1F352.png', multiplier: 2 },
+  { name: 'lemon', img: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/72x72/1F34B.png', multiplier: 3 },
+  { name: 'grape', img: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/72x72/1F347.png', multiplier: 4 },
+  { name: 'bell', img: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/72x72/1F514.png', multiplier: 5 },
+  { name: 'seven', img: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/72x72/0037-20E3.png', multiplier: 10 },
+  { name: 'diamond', img: 'https://raw.githubusercontent.com/hfg-gmuend/openmoji/master/color/72x72/1F48E.png', multiplier: 8 }
+];
+
+let grid = [], rows = 3, cols = 5;
+
+function createGrid() {
+  reels.innerHTML = '';
+  grid = [];
+  for (let r = 0; r < rows; r++) {
+    grid[r] = [];
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement('div');
+      cell.classList.add('symbol');
+      const img = document.createElement('img');
+      img.src = symbols[0].img;
+      cell.appendChild(img);
+      reels.appendChild(cell);
+      grid[r][c] = cell;
+    }
+  }
+}
+
+function spin() {
+  const bet = parseInt(betSelect.value);
+  if (balance < bet) {
+    resultText.textContent = "❌ Not enough balance!";
+    return;
+  }
+
+  spinSound.play();
+  balance -= bet;
+  stats.spins++;
+  let win = false;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+      const cell = grid[r][c];
+      const img = cell.querySelector('img');
+      img.src = symbol.img;
+      cell.dataset.name = symbol.name;
+      cell.dataset.multiplier = symbol.multiplier;
+    }
+  }
+
+  for (let r = 0; r < rows; r++) {
+    const first = grid[r][0].dataset.name;
+    if (grid[r].every(cell => cell.dataset.name === first)) {
+      const symbol = symbols.find(s => s.name === first);
+      const payout = bet * symbol.multiplier;
+      balance += payout;
+      stats.wins++;
+      winSound.play();
+      resultText.textContent = `🎉 Row ${r + 1} matched: ${first.toUpperCase()} wins $${payout}`;
+      win = true;
+      break;
+    }
+  }
+
+  if (!win) resultText.textContent = "😢 No match this time.";
+
+  updateBalanceDisplay();
+  updateStats();
+}
+// 🃏 BLACKJACK GAME
+let deck = [], playerCards = [], dealerCards = [], blackjackBet = 10, gameOver = false;
+
+function buildDeck() {
+  const suits = ['♠', '♥', '♦', '♣'];
+  const values = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  deck = [];
+  for (let suit of suits) {
+    for (let value of values) {
+      deck.push({ suit, value });
+    }
+  }
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+}
+
+function cardValue(card) {
+  if (['J','Q','K'].includes(card.value)) return 10;
+  if (card.value === 'A') return 11;
+  return parseInt(card.value);
+}
+
+function handValue(hand) {
+  let total = 0, aces = 0;
+  for (let card of hand) {
+    total += cardValue(card);
+    if (card.value === 'A') aces++;
+  }
+  while (total > 21 && aces > 0) {
+    total -= 10;
+    aces--;
+  }
+  return total;
+}
+
+function renderHand(hand, id, hideFirstCard = false) {
+  const area = document.getElementById(id);
+  area.innerHTML = '';
+
+  const valueMap = {
+    'A': 'ace',
+    'J': 'jack',
+    'Q': 'queen',
+    'K': 'king'
+  };
+
+  const suitMap = {
+    '♠': 'spades',
+    '♣': 'clubs',
+    '♥': 'hearts',
+    '♦': 'diamonds'
+  };
+
+  hand.forEach((card, index) => {
+    const div = document.createElement('div');
+    div.className = 'card';
+
+    const img = document.createElement('img');
+
+    if (index === 0 && hideFirstCard) {
+      img.src = "cards/back.png";
+    } else {
+      const rank = valueMap[card.value] || card.value.toLowerCase();
+      const suit = suitMap[card.suit];
+      img.src = `cards/${rank}_of_${suit}.png`;
+    }
+
+    img.style.width = '100%';
+    img.style.height = 'auto';
+    div.style.animationDelay = `${index * 0.15}s`;
+    div.appendChild(img);
+    area.appendChild(div);
+  });
+}
+
+function startBlackjack() {
+  blackjackBet = parseInt(document.getElementById("blackjack-bet").value);
+  if (balance < blackjackBet) {
+    document.getElementById("bjResult").textContent = "❌ Not enough balance!";
+    return;
+  }
+
+  balance -= blackjackBet;
+  stats.hands++;
+  updateBalanceDisplay();
+  updateStats();
+
+  gameOver = false;
+  playerCards = [];
+  dealerCards = [];
+  buildDeck();
+
+  playerCards.push(deck.pop(), deck.pop());
+  dealerCards.push(deck.pop(), deck.pop());
+
+  cardSound.play();
+  renderHand(playerCards, "playerHand");
+  renderHand(dealerCards, "dealerHand", true);
+  document.getElementById("bjResult").textContent = "🃏 Hit or Stand?";
+}
+
+function hit() {
+  if (gameOver) return;
+  playerCards.push(deck.pop());
+  cardSound.play();
+  renderHand(playerCards, "playerHand");
+
+  if (handValue(playerCards) > 21) {
+    document.getElementById("bjResult").textContent = `💥 Bust! You lose $${blackjackBet}`;
+    renderHand(dealerCards, "dealerHand");
+    gameOver = true;
+    updateBalanceDisplay();
+  }
+}
+
+function stand() {
+  if (gameOver) return;
+  while (handValue(dealerCards) < 17) {
+    dealerCards.push(deck.pop());
+  }
+
+  renderHand(dealerCards, "dealerHand");
+
+  const playerTotal = handValue(playerCards);
+  const dealerTotal = handValue(dealerCards);
+  let result = '';
+
+  if (dealerTotal > 21 || playerTotal > dealerTotal) {
+    const winnings = blackjackBet * 2;
+    balance += winnings;
+    stats.wins++;
+    winSound.play();
+    result = `🏆 You win $${winnings}!`;
+  } else if (playerTotal === dealerTotal) {
+    balance += blackjackBet;
+    result = "🤝 Push! Bet returned.";
+  } else {
+    result = `💀 Dealer wins. You lost $${blackjackBet}.`;
+  }
+
+  document.getElementById("bjResult").textContent = result;
+  gameOver = true;
+  updateBalanceDisplay();
+  updateStats();
+}
+
+// 🔁 INIT ON PAGE LOAD
+createGrid();
+updateBalanceDisplay();
+updateStats();
+loadPlayerName();
+</script>
+</body>
+</html>
